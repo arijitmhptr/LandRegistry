@@ -1,42 +1,66 @@
-apply plugin: 'org.springframework.boot'
+repositories {
+    mavenLocal()
+    jcenter()
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
+    maven { url 'https://ci-artifactory.corda.r3cev.com/artifactory/corda-releases' }
+}
+
+apply plugin: 'net.corda.plugins.cordformation'
+apply plugin: 'net.corda.plugins.quasar-utils'
 
 sourceSets {
     main {
         resources {
-            srcDir rootProject.file("config/dev")
+            srcDir "../config/dev"
         }
     }
 }
 
 dependencies {
-    // Corda dependencies.
-    compile "$corda_release_group:corda-rpc:$corda_release_version"
-
     // CorDapp dependencies.
     compile project(":contracts")
     compile project(":workflows")
 
+    testCompile "junit:junit:$junit_version"
+
+    // Corda dependencies.
+    compile "net.corda:corda-core:$corda_release_version"
+    compile "net.corda:corda-jackson:$corda_release_version"
+    compile "net.corda:corda-rpc:$corda_release_version"
+    compile "net.corda:corda:$corda_release_version"
+    testCompile "net.corda:corda-node-driver:$corda_release_version"
+
     compile("org.springframework.boot:spring-boot-starter-websocket:$spring_boot_version") {
         exclude group: "org.springframework.boot", module: "spring-boot-starter-logging"
     }
+    compile "org.springframework.boot:spring-boot-starter-log4j2:$spring_boot_version"
+    compile "org.apache.logging.log4j:log4j-web:$log4j_version"
 
-    compile "org.apache.logging.log4j:log4j-slf4j-impl:${log4j_version}"
-    compile "org.apache.logging.log4j:log4j-web:${log4j_version}"
-    compile "org.slf4j:jul-to-slf4j:$slf4j_version"
+    compile group: 'io.springfox', name: 'springfox-swagger2', version: '2.7.0'
+    compile group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.7.0'
 }
 
-springBoot {
-    mainClassName = "com.template.webserver.Server"
-}
-
-task runTemplateClient(type: JavaExec, dependsOn: assemble) {
+task runLandDepartment(type: JavaExec, dependsOn: jar) {
     classpath = sourceSets.main.runtimeClasspath
-    main = 'com.template.Client'
-    args 'localhost:10006', 'user1', 'test'
+    main = 'com.example.server.Server'
+    args '--server.port=50005', '--config.rpc.host=localhost', '--config.rpc.port=10006', '--config.rpc.username=user1', '--config.rpc.password=test'
 }
 
-task runTemplateServer(type: JavaExec, dependsOn: assemble) {
+task runBank(type: JavaExec, dependsOn: jar) {
     classpath = sourceSets.main.runtimeClasspath
-    main = 'com.template.webserver.Starter'
-    args '--server.port=10050', '--config.rpc.host=localhost', '--config.rpc.port=10006', '--config.rpc.username=user1', '--config.rpc.password=test'
+    main = 'com.example.server.Server'
+    args '--server.port=50006', '--config.rpc.host=localhost', '--config.rpc.port=10009', '--config.rpc.username=user1', '--config.rpc.password=test'
+}
+
+task runSurveyor(type: JavaExec, dependsOn: jar) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'com.example.server.Server'
+    args '--server.port=50007', '--config.rpc.host=localhost', '--config.rpc.port=10012', '--config.rpc.username=user1', '--config.rpc.password=test'
+}
+
+task runNotary(type: JavaExec, dependsOn: jar) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'com.example.server.Server'
+    args '--server.port=50008', '--config.rpc.host=localhost', '--config.rpc.port=10003', '--config.rpc.username=user1', '--config.rpc.password=test'
 }

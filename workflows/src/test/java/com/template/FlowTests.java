@@ -1,7 +1,7 @@
 package com.template;
 
 import com.google.common.collect.ImmutableList;
-import com.template.flows.IOUResponder;
+import com.template.flows.TransferPropertyFlow;
 import net.corda.testing.node.MockNetwork;
 import net.corda.testing.node.MockNetworkParameters;
 import net.corda.testing.node.StartedMockNode;
@@ -19,8 +19,8 @@ public class FlowTests {
     private final StartedMockNode b = network.createNode();
 
     public FlowTests() {
-        a.registerInitiatedFlow(IOUResponder.class);
-        b.registerInitiatedFlow(IOUResponder.class);
+//        a.registerInitiatedFlow(com.template.flows.TransferPropertyFlow.class);
+//        b.registerInitiatedFlow(TransferPropertyFlow.class);
     }
 
     @Before
